@@ -37,6 +37,8 @@ class MicroHub:
               x: float, y: float,
               costFixed         : list[int],
               costOperation     : dict[str, list[int]],
+              costInventory     : list[int],
+              costFromDC        : list[int],
               capacityOperation : dict[str, int],
               capacityInventory : int,
               timeFromDC        : float,
@@ -48,6 +50,8 @@ class MicroHub:
     self.location           = (self.x, self.y)
     self.costFixed          = costFixed
     self.costOperation      = costOperation
+    self.costInventory      = costInventory
+    self.costFromDC         = costFromDC
     self.capacityOperation  = capacityOperation
     self.capacityInventory  = capacityInventory
     self.timeFromDC         = timeFromDC
@@ -57,10 +61,10 @@ class MicroHub:
 class Vehicle:
   def __init__(self,
               id: str,
-              capacity        : float,
-              costByDistance  : float,
-              costByTime      : float,
-              costFixed       : float,
+              capacity        : int,
+              costByDistance  : int,
+              costByTime      : int,
+              costFixed       : int,
               speedLinehaul   : float,
               timeSetupRoute  : float,
               speedInterStop  : float,
@@ -70,7 +74,7 @@ class Vehicle:
               k = 1
               ):
     self.id       = id
-    self.capacity = int(capacity)
+    self.capacity = capacity
     self.costByDistance     = costByDistance      #cd
     self.costByTime         = costByTime          #ch
     self.costFixed          = costFixed           #F
