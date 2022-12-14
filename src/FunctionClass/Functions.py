@@ -58,9 +58,12 @@ def load_microhubs(path_microhub: str, num_instance: int, DEBUG = False) -> list
   for lab, row in df_mh.iterrows():
     costFixed         = [row['cf_'+str(i)]*1000 for i in range(24)]
     costOperation     = {}
+    costInventory     = [row['ci_'+str(i)]*1000 for i in range(24)]
     capacityOperation = {}
     capacityInventory = df_mh_capacity[row['osm_id']][3]
-    area              = row['area_m2']
+    areaKm            = float(row['area_m2']/1000)
+    timeFromDC        = float(row['duration_in_traffic.value']/3600)
+    costFromDC        = int(timeFromDC*20000)
     for j in range(1,11): # de 10, 20, 30, 40, .. ,100 % de capacidad
       cap_name = "cap_"+str(j/10)
       costOperation[cap_name]     = [row['co_'+str(i)]*1000*j/10 for i in range(24)]
@@ -70,10 +73,12 @@ def load_microhubs(path_microhub: str, num_instance: int, DEBUG = False) -> list
                             float(row['latitude']),
                             costFixed,
                             costOperation,
+                            costInventory,
+                            costFromDC,
                             capacityOperation,
                             capacityInventory,
-                            row['duration_in_traffic.value']/3600,
-                            float(area/1000))
+                            timeFromDC,
+                            areaKm)
     microHubs.append(new_microhub)
   if DEBUG:
     print("-"*100)
@@ -137,7 +142,7 @@ def __arceMultiperiod(segment: Segment, microHub: MicroHub, vehicle: Vehicle, di
   fleetSize = (segment.densityPopulationByPeriod[period]*segment.areaKm)/(numberOfStopPerRoute*numberOfRoutePerVehicle)
 
   # Cost First Echelon based-time from DC to Microhub
-  costFirstTier = microHub.timeFromDC*30000000/3600
+  costFirstTier = microHub.costFromDC
 
   # Cost SetUp + Fixed
   costSetUp = vehicle.costFixed*fleetSize
@@ -149,7 +154,7 @@ def __arceMultiperiod(segment: Segment, microHub: MicroHub, vehicle: Vehicle, di
   costIntraRoute = fleetSize*numberOfRoutePerVehicle*numberOfStopPerRoute((vehicle.timeSetupRoute + vehicle.timeServicePerStop*segment.dropSizeByPeriod[period] + (vehicle.k*segment.k)/(math.sqrt(segment.densityPopulationByPeriod[period])*vehicle.speedInterStop))*vehicle.costByTime +  vehicle.costByDistance*(vehicle.k*segment.k)/(math.sqrt(segment.densityPopulationByPeriod[period])))
 
   # Total Cost Arce by unit item-demand
-  totalCostArce = costFirstTier + costLineHaul + costSetUp + costIntraRoute
+  totalCostArce = costLineHaul + costSetUp + costIntraRoute
 
   resultArce['fleetSize']     = fleetSize
   resultArce['costFirstTier'] = costFirstTier
