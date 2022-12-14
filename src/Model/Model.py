@@ -84,7 +84,7 @@ class MP_2E:
     )
 
     cost_1e = quicksum(
-      [m.costPerUnitFromDC[t]*self.R[(m.id,t)]  for t in range(periods) for m in microHubs]
+      [m.costFromDC[t]*self.R[(m.id,t)]  for t in range(periods) for m in microHubs]
     )
 
     cost_2e = quicksum(
@@ -111,7 +111,7 @@ class MP_2E:
         nameConstraint  = "R_Operation_m"+str(m.id)+"_t"+str(t)
         self.model.addConstr(
           quicksum(
-            [self.W[(m.id,q,t)] for q in m.capacity.keys()] 
+            [self.W[(m.id,q,t)] for q in m.capacityOperation.keys()] 
             ) 
           <= 
           quicksum(
@@ -191,7 +191,7 @@ class MP_2E:
             self.X[(m.id,s.id,t)]
             <=
             quicksum(
-              [self.W[(m.id,q,t)] for q in m.capacity.keys()]
+              [self.W[(m.id,q,t)] for q in m.capacityOperation.keys()]
             )
             , name=nameConstraint
           )
@@ -225,7 +225,7 @@ class MP_2E:
     )
 
     self.objective["cost_1e"] = sum(
-      [m.costPerUnitFromDC[t]*self.R[(m.id,t)].x  for t in range(periods) for m in microHubs]
+      [m.costFromDC[t]*self.R[(m.id,t)].x  for t in range(periods) for m in microHubs]
     )
 
     self.objective["cost_2e"] = sum(
